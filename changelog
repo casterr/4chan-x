@@ -1,5 +1,12 @@
 master
 
+8.0.1
+
+8.0.0
+- Spaghetti
+  Initial fork.
+  Excuse me while I figure out what I'm doing
+
 2.34.2
 - Mayhem
   Adjust background tabs max update interval down to 5 minutes instead of 10.

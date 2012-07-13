@@ -2265,7 +2265,7 @@ Updater =
     checked = if Conf['Auto Update'] then 'checked' else ''
     html += "
       <div><label title='Controls whether *this* thread automatically updates or not'>Auto Update This<input name='Auto Update This' type=checkbox #{checked}></label></div>
-      <div><label>Interval (s)<input type=number name=Interval class=field min=5></label></div>
+      <div><label>Interval (s)<input type=number name=Interval class=field min=1></label></div>
       <div><input value='Update Now' type=button name='Update Now'></div>"
 
     dialog = UI.dialog 'updater', 'bottom: 0; right: 0;', html
@@ -2312,13 +2312,13 @@ Updater =
       return if state isnt 'visible'
       # Reset the counter when we focus this tab.
       Updater.unsuccessfulFetchCount = 0
-      if Updater.timer.textContent < -Conf['Interval']
-        Updater.timer.textContent = -Updater.getInterval()
+#      if Updater.timer.textContent < -Conf['Interval']
+#        Updater.timer.textContent = -Updater.getInterval()
     interval: ->
       val = parseInt @value, 10
-      @value = if val > 5 then val else 5
+      @value = if val > 1 then val else 1
       $.cb.value.call @
-      Updater.timer.textContent = -Updater.getInterval()
+#      Updater.timer.textContent = -Updater.getInterval()
     verbose: ->
       if Conf['Verbose']
         Updater.count.textContent = '+0'
@@ -2362,13 +2362,13 @@ Updater =
         return
 
       Updater.unsuccessfulFetchCount++
-      Updater.timer.textContent = -Updater.getInterval()
+#      Updater.timer.textContent = -Updater.getInterval()
 
       ###
       Status Code 304: Not modified
       By sending the `If-Modified-Since` header we get a proper status code, and no response.
       This saves bandwidth for both the user and the servers, avoid unnecessary computation,
-      and won't load images and scripts when parsing the response.
+      and won`t load images and scripts when parsing the response.
       ###
       if @status in [0, 304]
         # XXX 304 -> 0 in Opera
@@ -2396,7 +2396,7 @@ Updater =
       return unless count
 
       Updater.unsuccessfulFetchCount = 0
-      Updater.timer.textContent = -Updater.getInterval()
+#      Updater.timer.textContent = -Updater.getInterval()
       scroll = Conf['Scrolling'] && Updater.scrollBG() &&
         lastPost.getBoundingClientRect().bottom - d.documentElement.clientHeight < 25
       $.add Updater.thread, nodes.reverse()
@@ -2409,7 +2409,7 @@ Updater =
     unless d.hidden or d.oHidden or d.mozHidden or d.webkitHidden
       # Don't increase the refresh rate too much on visible tabs.
       j = Math.min j, 6
-    Math.max i, [5, 10, 15, 20, 30, 60, 90, 120, 240, 300][j]
+    Math.max i, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1][j]
 
   timeout: ->
     Updater.timeoutID = setTimeout Updater.timeout, 1000
@@ -4068,7 +4068,7 @@ Main =
     $.globalEval "(#{code})()".replace '_id_', bq.id
 
   namespace: '4chan_x.'
-  version: '2.34.2'
+  version: '8.0.1'
   callbacks: []
   css: '
 /* dialog styling */

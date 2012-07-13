@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name           4chan x
-// @version        2.34.2
+// @name           4chan xs
+// @version        8.0.1
 // @namespace      aeosynth
 // @description    Adds various features.
 // @copyright      2009-2011 James Campos <james.r.campos@gmail.com>
@@ -13,67 +13,20 @@
 // @include        http://sys.4chan.org/*
 // @include        https://sys.4chan.org/*
 // @run-at         document-start
-// @updateURL      https://github.com/MayhemYDG/4chan-x/raw/stable/4chan_x.user.js
-// @downloadURL    https://github.com/MayhemYDG/4chan-x/raw/stable/4chan_x.user.js
-// @icon           http://mayhemydg.github.com/4chan-x/favicon.gif
+// @updateURL      https://github.com/spaghetti2514/4chan-x/raw/stable/4chan_x.user.js
+// @downloadURL    https://github.com/spaghetti2514/4chan-x/raw/stable/4chan_x.user.js
+// @icon           http://spaghetti2514.github.com/4chan-x/favicon.gif
 // ==/UserScript==
 
 /* LICENSE
  *
- * Copyright (c) 2009-2011 James Campos <james.r.campos@gmail.com>
- * Copyright (c) 2012 Nicolas Stepien <stepien.nicolas@gmail.com>
- * http://mayhemydg.github.com/4chan-x/
- * 4chan X 2.34.2
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * HACKING
- *
- * 4chan X is written in CoffeeScript[1], and developed on GitHub[2].
- *
- * [1]: http://coffeescript.org/
- * [2]: https://github.com/MayhemYDG/4chan-x
+ * It's the MIT license. I assume you're all more than competent of looking it up.
  *
  * CONTRIBUTORS
  *
- * noface - unique ID fixes
- * desuwa - Firefox filename upload fix
- * seaweed - bottom padding for image hover
- * e000 - cooldown sanity check
- * ahodesuka - scroll back when unexpanding images, file info formatting
- * Shou- - pentadactyl fixes
- * ferongr - new favicons
- * xat- - new favicons
- * Zixaphir - fix qr textarea - captcha-image gap
- * Ongpot - sfw favicon
- * thisisanon - nsfw + 404 favicons
- * Anonymous - empty favicon
- * Seiba - chrome quick reply focusing
- * herpaderpderp - recaptcha fixes
- * WakiMiko - recaptcha tab order http://userscripts.org/scripts/show/82657
- * btmcsweeney - allow users to specify text for sauce links
- *
- * All the people who've taken the time to write bug reports.
- *
- * Thank you.
+ * A list of contributors is available inside Mayhem's version of 4chan X.
+ * Nonetheless, I appreciate everything everyone has done for this script in
+ * all its incarnations.
  */
 
 (function() {
@@ -2834,7 +2787,7 @@
         html += "<div><label title='" + title + "'>" + name + "<input name='" + name + "' type=checkbox " + checked + "></label></div>";
       }
       checked = Conf['Auto Update'] ? 'checked' : '';
-      html += "      <div><label title='Controls whether *this* thread automatically updates or not'>Auto Update This<input name='Auto Update This' type=checkbox " + checked + "></label></div>      <div><label>Interval (s)<input type=number name=Interval class=field min=5></label></div>      <div><input value='Update Now' type=button name='Update Now'></div>";
+      html += "      <div><label title='Controls whether *this* thread automatically updates or not'>Auto Update This<input name='Auto Update This' type=checkbox " + checked + "></label></div>      <div><label>Interval (s)<input type=number name=Interval class=field min=1></label></div>      <div><input value='Update Now' type=button name='Update Now'></div>";
       dialog = UI.dialog('updater', 'bottom: 0; right: 0;', html);
       this.count = $('#count', dialog);
       this.timer = $('#timer', dialog);
@@ -2887,17 +2840,13 @@
         if (state !== 'visible') {
           return;
         }
-        Updater.unsuccessfulFetchCount = 0;
-        if (Updater.timer.textContent < -Conf['Interval']) {
-          return Updater.timer.textContent = -Updater.getInterval();
-        }
+        return Updater.unsuccessfulFetchCount = 0;
       },
       interval: function() {
         var val;
         val = parseInt(this.value, 10);
-        this.value = val > 5 ? val : 5;
-        $.cb.value.call(this);
-        return Updater.timer.textContent = -Updater.getInterval();
+        this.value = val > 1 ? val : 1;
+        return $.cb.value.call(this);
       },
       verbose: function() {
         if (Conf['Verbose']) {
@@ -2951,12 +2900,11 @@
           return;
         }
         Updater.unsuccessfulFetchCount++;
-        Updater.timer.textContent = -Updater.getInterval();
         /*
               Status Code 304: Not modified
               By sending the `If-Modified-Since` header we get a proper status code, and no response.
               This saves bandwidth for both the user and the servers, avoid unnecessary computation,
-              and won't load images and scripts when parsing the response.
+              and won`t load images and scripts when parsing the response.
         */
 
         if ((_ref1 = this.status) === 0 || _ref1 === 304) {
@@ -2989,7 +2937,6 @@
           return;
         }
         Updater.unsuccessfulFetchCount = 0;
-        Updater.timer.textContent = -Updater.getInterval();
         scroll = Conf['Scrolling'] && Updater.scrollBG() && lastPost.getBoundingClientRect().bottom - d.documentElement.clientHeight < 25;
         $.add(Updater.thread, nodes.reverse());
         if (scroll) {
@@ -3004,7 +2951,7 @@
       if (!(d.hidden || d.oHidden || d.mozHidden || d.webkitHidden)) {
         j = Math.min(j, 6);
       }
-      return Math.max(i, [5, 10, 15, 20, 30, 60, 90, 120, 240, 300][j]);
+      return Math.max(i, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1][j]);
     },
     timeout: function() {
       var n;
@@ -5196,7 +5143,7 @@
       return $.globalEval(("(" + code + ")()").replace('_id_', bq.id));
     },
     namespace: '4chan_x.',
-    version: '2.34.2',
+    version: '8.0.1',
     callbacks: [],
     css: '\
 /* dialog styling */\
