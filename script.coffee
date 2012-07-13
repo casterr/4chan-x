@@ -1971,6 +1971,12 @@ QR =
       reply.rm()
     else
       QR.close()
+      
+    if g.REPLY and (Conf['Unread Count'] or Conf['Unread Favicon'])
+      Unread.foresee.push postID
+    if g.REPLY and Conf['Thread Updater'] and Conf['Auto Update This']
+      Updater.unsuccessfulFetchCount = 0
+      Updater.update()
 
     QR.status()
     QR.resetFileInput()
@@ -2258,7 +2264,7 @@ Options =
 
 Updater =
   init: ->
-    html = '<div class=move><span id=count></span> <span id=timer></span></div>'
+    html = "<div class=move><span id=count></span> <span id=timer>-#{Conf['Interval']}</span></div>"
     {checkbox} = Config.updater
     for name of checkbox
       title = checkbox[name][1]
@@ -2267,61 +2273,46 @@ Updater =
 
     checked = if Conf['Auto Update'] then 'checked' else ''
     html += "
-      <div><label title='Controls whether *this* thread automatically updates or not'>Auto Update This<input name='Auto Update This' type=checkbox #{checked}></label></div>
-      <div><label>Interval (s)<input type=number name=Interval class=field min=1></label></div>
-      <div><input value='Update Now' type=button name='Update Now'></div>"
+<div><label title='Controls whether *this* thread automatically updates or not'>Auto Update This<input name='Auto Update This' type=checkbox #{checked}></label></div>
+<div><label>Interval (s)<input name=Interval value=#{Conf['Interval']} class=field size=4></label></div>
+<div><input value='Update Now' type=button></div>"
 
     dialog = UI.dialog 'updater', 'bottom: 0; right: 0;', html
 
-    @count  = $ '#count', dialog
-    @timer  = $ '#timer', dialog
+    @count = $ '#count', dialog
+    @timer = $ '#timer', dialog
     @thread = $.id "t#{g.THREAD_ID}"
-
-    @unsuccessfulFetchCount = 0
-    @lastModified = '0'
+    @lastPost = @thread.lastElementChild
 
     for input in $$ 'input', dialog
       if input.type is 'checkbox'
         $.on input, 'click', $.cb.checked
-      switch input.name
-        when 'Scroll BG'
+        if input.name is 'Scroll BG'
           $.on input, 'click', @cb.scrollBG
           @cb.scrollBG.call input
-        when 'Verbose'
+        if input.name is 'Verbose'
           $.on input, 'click', @cb.verbose
           @cb.verbose.call input
-        when 'Auto Update This'
+        else if input.name is 'Auto Update This'
           $.on input, 'click', @cb.autoUpdate
           @cb.autoUpdate.call input
-        when 'Interval'
-          input.value = Conf['Interval']
-          $.on input, 'change', @cb.interval
-          @cb.interval.call input
-        when 'Update Now'
-          $.on input, 'click', @update
+          # Required for the QR's update after posting.
+          Conf[input.name] = input.checked
+      else if input.name is 'Interval'
+        $.on input, 'input', @cb.interval
+      else if input.type is 'button'
+        $.on input, 'click', @update
 
     $.add d.body, dialog
 
-    $.on d, 'QRPostSuccessful', @cb.post
-    $.on d, 'visibilitychange ovisibilitychange mozvisibilitychange webkitvisibilitychange', @cb.visibility
+    @retryCoef = 10
+    @lastModified = 0
 
   cb:
-    post: ->
-      return unless Conf['Auto Update This']
-      Updater.unsuccessfulFetchCount = 0
-      setTimeout Updater.update, 500
-    visibility: ->
-      state = d.visibilityState or d.oVisibilityState or d.mozVisibilityState or d.webkitVisibilityState
-      return if state isnt 'visible'
-      # Reset the counter when we focus this tab.
-      Updater.unsuccessfulFetchCount = 0
-#      if Updater.timer.textContent < -Conf['Interval']
-#        Updater.timer.textContent = -Updater.getInterval()
     interval: ->
       val = parseInt @value, 10
-      @value = if val > 1 then val else 1
+      @value = if val > 0 then val else 30
       $.cb.value.call @
-#      Updater.timer.textContent = -Updater.getInterval()
     verbose: ->
       if Conf['Verbose']
         Updater.count.textContent = '+0'
@@ -2332,8 +2323,8 @@ Updater =
           textContent: 'Thread Updater'
         Updater.timer.hidden = true
     autoUpdate: ->
-      if Conf['Auto Update This'] = @checked
-        Updater.timeoutID = setTimeout Updater.timeout, 1000
+      if @checked
+        Updater.timeoutID = setTimeout Updater.timeout, 100
       else
         clearTimeout Updater.timeoutID
     scrollBG: ->
@@ -2346,7 +2337,7 @@ Updater =
       if @status is 404
         Updater.timer.textContent = ''
         Updater.count.textContent = 404
-        Updater.count.className   = 'warning'
+        Updater.count.className = 'warning'
         clearTimeout Updater.timeoutID
         g.dead = true
         if Conf['Unread Count']
@@ -2356,35 +2347,33 @@ Updater =
         Unread.update true
         QR.abort()
         return
-      unless @status in [0, 200, 304]
-        # XXX 304 -> 0 in Opera
+      if @status isnt 200 and @status isnt 304
+        Updater.retryCoef += 10 * (Updater.retryCoef < 120)
         if Conf['Verbose']
           Updater.count.textContent = @statusText
-          Updater.count.className   = 'warning'
-        Updater.unsuccessfulFetchCount++
+          Updater.count.className = 'warning'
         return
 
-      Updater.unsuccessfulFetchCount++
-#      Updater.timer.textContent = -Updater.getInterval()
+      Updater.retryCoef = 10
+      Updater.timer.textContent = "-#{Conf['Interval']}"
 
       ###
       Status Code 304: Not modified
       By sending the `If-Modified-Since` header we get a proper status code, and no response.
       This saves bandwidth for both the user and the servers, avoid unnecessary computation,
-      and won`t load images and scripts when parsing the response.
+      and won't load images and scripts when parsing the response.
       ###
-      if @status in [0, 304]
-        # XXX 304 -> 0 in Opera
+      if @status is 304
         if Conf['Verbose']
           Updater.count.textContent = '+0'
-          Updater.count.className   = null
+          Updater.count.className = null
         return
       Updater.lastModified = @getResponseHeader 'Last-Modified'
 
       doc = d.implementation.createHTMLDocument ''
       doc.documentElement.innerHTML = @response
 
-      lastPost = Updater.thread.lastElementChild
+      {lastPost} = Updater
       id = lastPost.id[2..]
       nodes = []
       for reply in $$('.replyContainer', doc).reverse()
@@ -2392,27 +2381,17 @@ Updater =
         nodes.push reply
 
       count = nodes.length
+      scroll = Conf['Scrolling'] && Updater.scrollBG() && count &&
+        lastPost.getBoundingClientRect().bottom - d.documentElement.clientHeight < 25
       if Conf['Verbose']
         Updater.count.textContent = "+#{count}"
-        Updater.count.className   = if count then 'new' else null
+        Updater.count.className = if count then 'new' else null
 
-      return unless count
-
-      Updater.unsuccessfulFetchCount = 0
-#      Updater.timer.textContent = -Updater.getInterval()
-      scroll = Conf['Scrolling'] && Updater.scrollBG() &&
-        lastPost.getBoundingClientRect().bottom - d.documentElement.clientHeight < 25
+      if lastPost = nodes[0]
+        Updater.lastPost = lastPost
       $.add Updater.thread, nodes.reverse()
       if scroll
         nodes[0].scrollIntoView()
-
-  getInterval: ->
-    i = +Conf['Interval']
-    j = Math.min @unsuccessfulFetchCount, 9
-    unless d.hidden or d.oHidden or d.mozHidden or d.webkitHidden
-      # Don't increase the refresh rate too much on visible tabs.
-      j = Math.min j, 6
-    Math.max i, [1, 1, 1, 1, 1, 1, 1, 1, 1, 1][j]
 
   timeout: ->
     Updater.timeoutID = setTimeout Updater.timeout, 1000
@@ -2420,18 +2399,21 @@ Updater =
 
     if n is 0
       Updater.update()
-    else if n >= Updater.getInterval()
-      Updater.unsuccessfulFetchCount++
-      Updater.count.textContent = 'Retry'
-      Updater.count.className   = null
-      Updater.update()
+    else if n is Updater.retryCoef
+      Updater.retryCoef += 10 * (Updater.retryCoef < 120)
+      Updater.retry()
     else
       Updater.timer.textContent = n
+
+  retry: ->
+    @count.textContent = 'Retry'
+    @count.className = null
+    @update()
 
   update: ->
     Updater.timer.textContent = 0
     Updater.request?.abort()
-    # Fool the cache.
+    #fool the cache
     url = location.pathname + '?' + Date.now()
     Updater.request = $.ajax url, onload: Updater.cb.update,
       headers: 'If-Modified-Since': Updater.lastModified
