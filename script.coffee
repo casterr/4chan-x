@@ -60,7 +60,7 @@ Config =
       'Indicate Cross-thread Quotes': [true,  'Add \'(Cross-thread)\' to cross-threads quotes']
       'Forward Hiding':               [true,  'Hide original posts of inlined backlinks']
     Tweaks:
-      'Remove Annoncement':           [false,  'Remove the \'Important Announcement\' (overwrites shrink)']
+      'Remove Announcement':          [false,  'Remove the \'Important Announcement\' (overwrites shrink)']
       'Shrink Announcement':          [false,  'Make the \'Important Announcement\' smaller']
   filter:
     name: [
@@ -3824,12 +3824,12 @@ Main =
     if Conf['Quick Reply'] and Conf['Hide Original Post Form']
       Main.css += '#postForm { display: none; }'
       
+    if Conf['Shrink Announcement']
+      Main.css += '.globalMessage { font-size: 0.5em; }'
+      
     if Conf['Remove Announcement']
       Main.css += '.globalMessage { display: none; }'
       
-    if Conf['Shrink Announcement']
-      Main.css += '.globalMessage { font-size: 0.5em; }'
-
     Main.addStyle()
 
     now = Date.now()
@@ -3838,7 +3838,7 @@ Main =
         $.on window, 'message', Main.message
         $.set 'lastUpdate', now
         $.add d.head, $.el 'script',
-          src: 'https://github.com/MayhemYDG/4chan-x/raw/master/latest.js'
+          src: 'https://github.com/spaghetti2514/4chan-x/raw/master/latest.js'
 
     g.hiddenReplies = $.get "hiddenReplies/#{g.BOARD}/", {}
     if $.get('lastChecked', 0) < now - 1*$.DAY
@@ -4023,7 +4023,7 @@ Main =
   message: (e) ->
     {version} = e.data
     if version and version isnt Main.version and confirm 'An updated version of 4chan X is available, would you like to install it now?'
-      window.location = "https://raw.github.com/mayhemydg/4chan-x/#{version}/4chan_x.user.js"
+      window.location = "https://raw.github.com/spaghetti2514/4chan-x/#{version}/4chan_x.user.js"
 
   preParse: (node) ->
     parentClass = node.parentNode.className
@@ -4054,7 +4054,7 @@ Main =
       try
         callback node for node in nodes
       catch err
-        alert "4chan X (#{Main.version}) error: #{err.message}\nReport the bug at mayhemydg.github.com/4chan-x/#bug-report\n\nURL: #{window.location}\n#{err.stack}" if notify
+        alert "4chan X (#{Main.version}) error: #{err.message}\nReport the bug at spaghetti2514.github.com/4chan-x/#bug-report\n\nURL: #{window.location}\n#{err.stack}" if notify
     return
   observer: (mutations) ->
     nodes = []

@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name           4chan Xs
-// @version        8.0.3
+// @name           4chan x
+// @version        8.0.4
 // @namespace      spaghetti
 // @description    Adds various features.
 // @copyright      2009-2011 James Campos <james.r.campos@gmail.com>
@@ -101,7 +101,7 @@
         'Forward Hiding': [true, 'Hide original posts of inlined backlinks']
       },
       Tweaks: {
-        'Remove Annoncement': [false, 'Remove the \'Important Announcement\' (overwrites shrink)'],
+        'Remove Announcement': [false, 'Remove the \'Important Announcement\' (overwrites shrink)'],
         'Shrink Announcement': [false, 'Make the \'Important Announcement\' smaller']
       }
     },
@@ -4840,11 +4840,11 @@
       if (Conf['Quick Reply'] && Conf['Hide Original Post Form']) {
         Main.css += '#postForm { display: none; }';
       }
-      if (Conf['Remove Announcement']) {
-        Main.css += '.globalMessage { display: none; }';
-      }
       if (Conf['Shrink Announcement']) {
         Main.css += '.globalMessage { font-size: 0.5em; }';
+      }
+      if (Conf['Remove Announcement']) {
+        Main.css += '.globalMessage { display: none; }';
       }
       Main.addStyle();
       now = Date.now();
@@ -4853,7 +4853,7 @@
           $.on(window, 'message', Main.message);
           $.set('lastUpdate', now);
           return $.add(d.head, $.el('script', {
-            src: 'https://github.com/MayhemYDG/4chan-x/raw/master/latest.js'
+            src: 'https://github.com/spaghetti2514/4chan-x/raw/master/latest.js'
           }));
         });
       }
@@ -5067,7 +5067,7 @@
       var version;
       version = e.data.version;
       if (version && version !== Main.version && confirm('An updated version of 4chan X is available, would you like to install it now?')) {
-        return window.location = "https://raw.github.com/mayhemydg/4chan-x/" + version + "/4chan_x.user.js";
+        return window.location = "https://raw.github.com/spaghetti2514/4chan-x/" + version + "/4chan_x.user.js";
       }
     },
     preParse: function(node) {
@@ -5108,7 +5108,7 @@
           }
         } catch (err) {
           if (notify) {
-            alert("4chan X (" + Main.version + ") error: " + err.message + "\nReport the bug at mayhemydg.github.com/4chan-x/#bug-report\n\nURL: " + window.location + "\n" + err.stack);
+            alert("4chan X (" + Main.version + ") error: " + err.message + "\nReport the bug at spaghetti2514.github.com/4chan-x/#bug-report\n\nURL: " + window.location + "\n" + err.stack);
           }
         }
       }

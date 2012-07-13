@@ -1,5 +1,12 @@
 master
 
+8.0.4
+- Spaghetti
+  Bugfixes
+    - Remove Announcement now works
+    - Can now be upgraded to from other versions of 4chan X
+    - Some fixed links
+
 8.0.3
 - Spaghetti
   Add announcement removal option

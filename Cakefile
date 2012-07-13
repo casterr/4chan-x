@@ -2,13 +2,13 @@
 {exec} = require 'child_process'
 fs     = require 'fs'
 
-VERSION = '8.0.2'
+VERSION = '8.0.4'
 
 HEADER  = """
 // ==UserScript==
-// @name           4chan xs
+// @name           4chan x
 // @version        #{VERSION}
-// @namespace      aeosynth
+// @namespace      spaghetti
 // @description    Adds various features.
 // @copyright      2009-2011 James Campos <james.r.campos@gmail.com>
 // @copyright      2012 Nicolas Stepien <stepien.nicolas@gmail.com>
