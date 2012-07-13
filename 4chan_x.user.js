@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name           4chan xs
-// @version        8.0.1
+// @version        8.0.2
 // @namespace      aeosynth
 // @description    Adds various features.
 // @copyright      2009-2011 James Campos <james.r.campos@gmail.com>
@@ -99,6 +99,9 @@
         'Indicate OP quote': [true, 'Add \'(OP)\' to OP quotes'],
         'Indicate Cross-thread Quotes': [true, 'Add \'(Cross-thread)\' to cross-threads quotes'],
         'Forward Hiding': [true, 'Hide original posts of inlined backlinks']
+      },
+      Tweaks: {
+        'Shrink Announcement': [true, 'Make the \'Important Announcement\' smaller']
       }
     },
     filter: {
@@ -2501,9 +2504,9 @@
         className: 'reply dialog',
         innerHTML: '<div id=optionsbar>\
   <div id=credits>\
-    <a target=_blank href=http://mayhemydg.github.com/4chan-x/>4chan X</a>\
-    | <a target=_blank href=https://raw.github.com/mayhemydg/4chan-x/master/changelog>' + Main.version + '</a>\
-    | <a target=_blank href=http://mayhemydg.github.com/4chan-x/#bug-report>Issues</a>\
+    <a target=_blank href=http://spaghetti2514.github.com/4chan-x/>4chan Xs</a>\
+    | <a target=_blank href=https://github.com/spaghetti2514/4chan-x/blob/master/changelog>' + Main.version + '</a>\
+    | <a target=_blank href=http://spaghetti2514.github.com/4chan-x/#bug-report>Issues</a>\
   </div>\
   <div>\
     <label for=main_tab>Main</label>\
@@ -5143,7 +5146,7 @@
       return $.globalEval(("(" + code + ")()").replace('_id_', bq.id));
     },
     namespace: '4chan_x.',
-    version: '8.0.1',
+    version: '8.0.2',
     callbacks: [],
     css: '\
 /* dialog styling */\
